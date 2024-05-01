@@ -40,6 +40,18 @@ class CategorySerializer(serializers.ModelSerializer):
 
   def create(self, validated_data):
     return Category.objects.create(**validated_data)
+  
+  def update(self, instance, validated_data):
+    return super().update(instance, validated_data)
+  
+class CategoryViewSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Category
+    fields = [
+      'id',
+      'name', 'description', 'created_at', 'updated_at'
+    ]
+
 
 class ProductSerializer(serializers.ModelSerializer):
   category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
@@ -63,27 +75,27 @@ class ProductSerializer(serializers.ModelSerializer):
   def update(self, instance, validated_data):
     return super().update(instance, validated_data)
   
-  class ProductViewSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
-    class Meta:
-      model = Product
-      fields = [
-        'id',
-        'name',
-        'description',
-        'price',
-        'quantity_available',
-        'image',
-        'category',
-        'created_at',
-        'updated_at'
-      ]
+class ProductViewSerializer(serializers.ModelSerializer):
+  category = CategorySerializer()
+  class Meta:
+    model = Product
+    fields = [
+      'id',
+      'name',
+      'description',
+      'price',
+      'quantity_available',
+      'image',
+      'category',
+      'created_at',
+      'updated_at'
+    ]
 
-  def update(self, instance, validated_data):
-    instance.quantity_available = validated_data.get('quantity_available', instance.quantity_available)
-    instance.save()
-    return instance
-  
+def update(self, instance, validated_data):
+  instance.quantity_available = validated_data.get('quantity_available', instance.quantity_available)
+  instance.save()
+  return instance
+
 class CartSerializer(serializers.ModelSerializer):
   user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
   product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())

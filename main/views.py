@@ -1,10 +1,9 @@
 from django.shortcuts import render
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserSerializer, CategorySerializer, ProductSerializer, OrderSerializer, CartSerializer, CartViewSerializer
-from .permissions import IsAdmin
+from .serializers import UserSerializer, CategorySerializer, ProductSerializer, OrderSerializer, CartSerializer, CartViewSerializer, ProductViewSerializer, CategoryViewSerializer
 from .models import Category, Product, Order, User, Cart
 
 # Create your views here.
@@ -23,15 +22,25 @@ class RegisterViewSet(viewsets.ModelViewSet):
   def get_queryset(self):
     return []
   
+class CategoryListView(viewsets.ModelViewSet):
+  queryset = Category.objects.all()
+  serializer_class = CategoryViewSerializer
+  permission_classes = [IsAuthenticated]
+
+class ProductListView(viewsets.ModelViewSet):
+  queryset = Product.objects.all()
+  serializer_class = ProductViewSerializer
+  permission_classes = [IsAuthenticated]
+
 class CategoryViewSet(viewsets.ModelViewSet):
   queryset = Category.objects.all()
   serializer_class = CategorySerializer
-  permission_classes = [IsAuthenticated]
+  permission_classes = [IsAuthenticated, IsAdminUser]
 
 class ProductViewSet(viewsets.ModelViewSet):
   queryset = Product.objects.all()
   serializer_class = ProductSerializer
-  permission_classes = [IsAuthenticated]
+  permission_classes = [IsAuthenticated, IsAdminUser]
 
 class CartViewSet(viewsets.ModelViewSet):
   queryset = Cart.objects.all()
