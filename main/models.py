@@ -34,13 +34,14 @@ class Cart(models.Model):
   user = models.ForeignKey(User, verbose_name='user', on_delete=models.CASCADE)
   product = models.ForeignKey(Product, verbose_name='product', on_delete=models.CASCADE)
   quantity = models.CharField(max_length=10)
+  checked_out = models.BooleanField(default=False)
   created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)
 
   models.UniqueConstraint(fields=['user', 'product'], name='unique_product_cart')
 
 class Order(models.Model):
-  cart = models.OneToOneField(Cart, verbose_name='Cart', on_delete=models.CASCADE)
+  cart = models.ManyToManyField(Cart, verbose_name='Cart')
   amount = models.CharField(max_length=10)
   shipping_address = models.CharField(max_length=100)
   payment_method = models.CharField(max_length=100)

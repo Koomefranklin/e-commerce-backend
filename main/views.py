@@ -48,7 +48,7 @@ class CartViewSet(viewsets.ModelViewSet):
   permission_classes = [IsAuthenticated]
   def get_queryset(self):
     user = self.request.user
-    return Cart.objects.filter(user=user)
+    return Cart.objects.filter(user=user, checked_out=False)
   
 class CartListView(viewsets.ModelViewSet):
   queryset = Cart.objects.all()
@@ -56,7 +56,7 @@ class CartListView(viewsets.ModelViewSet):
   permission_classes = [IsAuthenticated]
   def get_queryset(self):
     user = self.request.user
-    return Cart.objects.filter(user=user)
+    return Cart.objects.filter(user=user, checked_out=False)
 
 class OrderViewSet(viewsets.ModelViewSet):
   queryset = Order.objects.all()

@@ -106,6 +106,7 @@ class CartSerializer(serializers.ModelSerializer):
       'user',
       'product',
       'quantity',
+      'checked_out',
       'created_at',
       'updated_at'
     ]
@@ -143,10 +144,11 @@ class CartViewSerializer(serializers.ModelSerializer):
       'user',
       'product',
       'quantity',
+      'checked_out'
     ]
 
 class OrderSerializer(serializers.ModelSerializer):
-  cart = serializers.PrimaryKeyRelatedField(queryset=Cart.objects.all())
+  cart = serializers.PrimaryKeyRelatedField(queryset=Cart.objects.filter(checked_out=False), many=True)
   class Meta:
     model = Order
     fields = [
@@ -160,4 +162,17 @@ class OrderSerializer(serializers.ModelSerializer):
     ]
 
   def create(self, validated_data):
-    return Order.objects.create(**validated_data)
+    cart_data = validated_data.pop('cart', [])
+    amount = validated_data.get('amount')
+    shipping_address = validated_data.get('shipping_address')
+    payment_method = validated_data.get('payment_method')
+
+    order = Order.objects.create(amount=amount, shipping_address=shipping_address, payment_method=payment_method)
+
+    for cart in cart_data:
+      order.cart.add(cart)
+      cart_instance = Cart.objects.get(pk=cart.id)
+      cart_instance.checked_out = True
+      cart_instance.save()
+
+    return order
