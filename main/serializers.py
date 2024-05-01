@@ -60,6 +60,30 @@ class ProductSerializer(serializers.ModelSerializer):
   def create(self, validated_data):
     return Product.objects.create(**validated_data)
   
+  def update(self, instance, validated_data):
+    return super().update(instance, validated_data)
+  
+  class ProductViewSerializer(serializers.ModelSerializer):
+    category = CategorySerializer()
+    class Meta:
+      model = Product
+      fields = [
+        'id',
+        'name',
+        'description',
+        'price',
+        'quantity_available',
+        'image',
+        'category',
+        'created_at',
+        'updated_at'
+      ]
+
+  def update(self, instance, validated_data):
+    instance.quantity_available = validated_data.get('quantity_available', instance.quantity_available)
+    instance.save()
+    return instance
+  
 class CartSerializer(serializers.ModelSerializer):
   user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
   product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
@@ -82,6 +106,9 @@ class CartSerializer(serializers.ModelSerializer):
     try:
       if not cart_data:
         data = {'user': user, 'product': product, 'quantity': quantity}
+        product_instance = Product.objects.get(pk=product.id)
+        product_instance.quantity_available = int(product_instance.quantity_available) - int(quantity)
+        product_instance.save()
         cart_data = Cart.objects.create(**data)
       else:
         raise IntegrityError("The Product already exsist in your cart")
